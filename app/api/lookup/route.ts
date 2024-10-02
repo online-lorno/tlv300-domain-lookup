@@ -1,3 +1,4 @@
+import { ContactInfo, DomainInfo } from "@/app/types";
 import { NextResponse } from "next/server";
 
 const API_URL = "https://www.whoisxmlapi.com/whoisserver/WhoisService";
@@ -20,26 +21,31 @@ export async function POST(request: Request) {
     const whoisRecord = data.WhoisRecord;
 
     if (type === "domain") {
-      return NextResponse.json({
+      const data: DomainInfo = {
         domainName: whoisRecord.domainName,
         registrar: whoisRecord.registrarName,
-        registrationDate: whoisRecord.createdDate,
-        expirationDate: whoisRecord.expiresDate,
-        estimatedDomainAge: calculateAge(whoisRecord.createdDate),
+        registrationDate:
+          whoisRecord.registryData?.createdDate || "Not available",
+        expirationDate:
+          whoisRecord.registryData?.expiresDate || "Not available",
+        estimatedDomainAge: whoisRecord.estimatedDomainAge
+          ? calculateDomainAge(Number(whoisRecord.estimatedDomainAge))
+          : "Not available",
         hostnames: whoisRecord.nameServers?.hostNames || [],
-      });
-    } else if (type === "contact") {
-      const registrant = whoisRecord.registrant || {};
-      const admin = whoisRecord.administrativeContact || {};
-      const tech = whoisRecord.technicalContact || {};
+      };
 
-      return NextResponse.json({
-        registrantName: registrant.name || "Not available",
-        technicalContactName: tech.name || "Not available",
-        administrativeContactName: admin.name || "Not available",
-        contactEmail:
-          registrant.email || admin.email || tech.email || "Not available",
-      });
+      return NextResponse.json(data);
+    } else if (type === "contact") {
+      const data: ContactInfo = {
+        registrantName: whoisRecord.registrant?.organization || "Not available",
+        technicalContactName:
+          whoisRecord.technicalContact?.organization || "Not available",
+        administrativeContactName:
+          whoisRecord.administrativeContact?.organization || "Not available",
+        contactEmail: whoisRecord.contactEmail || "Not available",
+      };
+
+      return NextResponse.json(data);
     } else {
       return NextResponse.json(
         { error: "Invalid lookup type" },
@@ -55,9 +61,10 @@ export async function POST(request: Request) {
   }
 }
 
-function calculateAge(creationDate: string) {
-  if (!creationDate) return "Unknown";
-  const ageInMs = Date.now() - new Date(creationDate).getTime();
-  const ageInYears = Math.floor(ageInMs / (1000 * 60 * 60 * 24 * 365.25));
-  return `${ageInYears} years`;
+function calculateDomainAge(days: number): string {
+  const years = Math.floor(days / 365);
+  const months = Math.floor((days % 365) / 30);
+  const remainingDays = days - years * 365 - months * 30;
+
+  return `${years} years, ${months} months, ${remainingDays} days`;
 }
