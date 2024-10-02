@@ -10,35 +10,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-
-type LookupType = "domain" | "contact";
-
-type DomainInfo = {
-  domainName: string;
-  registrar: string;
-  registrationDate: string;
-  expirationDate: string;
-  estimatedDomainAge: string;
-  hostnames: string[];
-};
-
-type ContactInfo = {
-  registrantName: string;
-  technicalContactName: string;
-  administrativeContactName: string;
-  contactEmail: string;
-};
+import ContactInfoTable from "./ContactinfoTable";
+import DomainInfoTabe from "./DomainInfoTabe";
+import type { LookupType, DomainInfo, ContactInfo } from "../types";
 
 export default function DomainLookup() {
   const [domain, setDomain] = useState("");
@@ -81,7 +57,7 @@ export default function DomainLookup() {
   };
 
   return (
-    <div className="container mx-auto p-4 max-w-3xl">
+    <div className="container mx-auto p-4 max-w-4xl">
       <h1 className="text-3xl font-bold mb-6">Domain Lookup</h1>
       <form onSubmit={handleSubmit} className="space-y-4 mb-8">
         <Input
@@ -114,31 +90,12 @@ export default function DomainLookup() {
         </Alert>
       )}
 
-      {result && (
-        <Table>
-          <TableCaption>
-            {lookupType === "domain"
-              ? "Domain Information"
-              : "Contact Information"}
-          </TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Field</TableHead>
-              <TableHead>Value</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {Object.entries(result).map(([key, value]) => (
-              <TableRow key={key}>
-                <TableCell className="font-medium">{key}</TableCell>
-                <TableCell>
-                  {Array.isArray(value) ? value.join(", ") : value}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      )}
+      {result &&
+        (lookupType === "domain" ? (
+          <DomainInfoTabe info={result as DomainInfo} />
+        ) : (
+          <ContactInfoTable info={result as ContactInfo} />
+        ))}
     </div>
   );
 }
