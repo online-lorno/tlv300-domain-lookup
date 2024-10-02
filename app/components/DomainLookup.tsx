@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
-import ContactInfoTable from "./ContactinfoTable";
+import ContactInfoTable from "./ContactInfoTable";
 import DomainInfoTabe from "./DomainInfoTabe";
 import type { LookupType, DomainInfo, ContactInfo } from "../types";
 
