@@ -23,6 +23,11 @@ export default function DomainLookup() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const handleChangeLookupType = (value: LookupType) => {
+    setResult(null);
+    setLookupType(value);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -65,10 +70,7 @@ export default function DomainLookup() {
           value={domain}
           onChange={(e) => setDomain(e.target.value)}
         />
-        <Select
-          value={lookupType}
-          onValueChange={(value: LookupType) => setLookupType(value)}
-        >
+        <Select value={lookupType} onValueChange={handleChangeLookupType}>
           <SelectTrigger>
             <SelectValue placeholder="Select lookup type" />
           </SelectTrigger>
@@ -77,7 +79,7 @@ export default function DomainLookup() {
             <SelectItem value="contact">Contact Information</SelectItem>
           </SelectContent>
         </Select>
-        <Button type="submit" disabled={loading}>
+        <Button type="submit" disabled={loading || !domain}>
           {loading ? "Looking up..." : "Lookup"}
         </Button>
       </form>
